@@ -1,27 +1,59 @@
+import pytest
 import math
-
-from minitorch.operators import(add, mul, id, neg, lt, eq, max, is_close, sigmoid, relu, log,exp, inv, inv_back, naive_sigmoid)   
-
-def test_add():
-    assert add(3, 3) == 6
-    assert add(-1, 1) == 0
+from hypothesis import given
+from hypothesis.strategies import floats
 
 
-def test_mul():
-    assert mul(3, 3) == 9
-    assert mul(-1, 1) == -1
+from minitorch.operators import(add, mul, id, neg, lt, eq, max, is_close, sigmoid, relu, log,exp, inv, inv_back , map)   
+from minitorch.testing import assert_close
+
+small_floats = floats(min_value=-100, max_value=100) 
+
+@pytest.mark.task0_2
+@given(small_floats, small_floats,small_floats)
+def test_distributive(x, y, z):
+    """Test distributive property: z * (x + y) = z*x + z*y"""
+    if all(math.isfinite(v) for v in [x, y, z]):
+        #Left side: z * (x + y)
+        left_side = mul(z, add(x, y))
+        #right side: z*x + z*y
+        right_side = add(mul(z, x), mul(z, y))
+        assert_close(left_side, right_side)
+
+
+@pytest.mark.task0_2
+@given(small_floats, small_floats)
+def test_symmetry(x , y):
+    """Test that multipilication is commutative."""
+    if math.isfinite(x) and math.isfinite(y):
+        assert_close(mul(x, y), mul(y, x))
+
+
 
 def test_id():
     assert id(3) == 3
     assert id(-1) == -1
 
-def test_neg():
-    assert neg(3) == -3
-    assert neg(-1) == 1
 
-def test_lt():
-    assert lt(3, 4) == 1.0
-    assert lt(4, 3) == 0.0
+@pytest.mark.task0_2
+@given(small_floats)
+def test_other(a):
+    """Test that negation is the inverse of itself: neg(neg(a)) = a."""
+    if math.isfinite(a):
+        assert_close(neg(neg(a)), a)
+
+
+
+
+@pytest.mark.task0_2
+@given(small_floats, small_floats, small_floats)
+def test_transitive(a, b, c):
+    """Test transitive property of less-than operator: if a < b and b < c, than a < c."""
+    if all(math.isfinite(v) for v in [a, b, c]):
+        #check if a < b and b < c
+        if(lt(a, b) == 1.0 and lt(b, c) ==1.0):
+            assert lt(a, c) == 1.0
+
 
 def test_eq():
     assert eq(3, 3) == 1.0
@@ -35,9 +67,29 @@ def test_is_close():
     assert is_close(1.000000001, 1.000000002) == 1.0
     assert is_close(1.0, 2.0) == 0.0
 
-def test_sigmoid():
-    result = sigmoid(0)
-    assert abs(result - 0.5) < 1e-6
+#-------------------
+## Property-based testing with Hypothesis
+
+@pytest.mark.task0_2  # Labels this test under "task0_2" for grouping/filtering
+@given(small_floats) # Hypothesis: auto-generates many random float inputs
+def test_sigmoid_properties(a):
+    "Test mathematical properties of sigmoid function"
+
+    if(math.isfinite(a)):
+        sig_a = sigmoid(a)
+
+        #Property 1 : Output bounded between 0 and 1
+        assert 0.0 <sig_a< 1.0
+
+        #Property 2 : Sigmoid(0) = 0.5
+        if is_close(a, 0.0) == 1.0:
+            assert is_close(sig_a, 0.5) == 1.0
+
+        #Property 3 :sigmoid(-x) = 1 - sigmoid(x)
+        sig_neg_a = sigmoid(-a)
+        expected = 1.0 - sig_a
+        assert is_close(sig_neg_a, expected) == 1.0
+
 
 def test_relu():
     assert relu(3) == 3
@@ -68,7 +120,6 @@ def test_relu_back():
 
 
 
+#Higher order functions testing using property-based testing
 
-# def test_naive_sigmoid():
-#     result = naive_sigmoid(-1000)
-#     assert abs(result - 0.5) < 1e-6 
+
