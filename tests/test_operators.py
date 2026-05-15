@@ -2,12 +2,18 @@ import pytest
 import math
 from hypothesis import given
 from hypothesis.strategies import floats
+from hypothesis.strategies import lists
 
 
 from minitorch.operators import(add, mul, id, neg, lt, eq, max, is_close, sigmoid, relu, log,exp, inv, inv_back , map)   
 from minitorch.testing import assert_close
 
 small_floats = floats(min_value=-100, max_value=100) 
+
+small_float_lists = lists(
+    floats(min_value=-100, max_value=100, allow_nan=False, allow_infinity=False),
+    max_size=20,
+)
 
 @pytest.mark.task0_2
 @given(small_floats, small_floats,small_floats)
@@ -121,5 +127,30 @@ def test_relu_back():
 
 
 #Higher order functions testing using property-based testing
+
+
+@pytest.mark.task0_3
+@given(small_float_lists)
+def test_map_length_preserved(xs):
+    #Property 1 : Length preserved 
+    """Test that map preserves the length of the input list."""
+    double = lambda x: x * 2
+    result = map(double)(xs)
+    assert len(result) == len(xs)
+
+    #property 2 : Identity map returns the same list
+    identity_result = map(id)(xs)
+    assert identity_result == xs
+
+    #Property 3 : Composite property
+    increment = lambda x: x + 1
+    composite_result = map(increment)(map(double)(xs))
+    expected = [increment(double(x)) for x in xs]
+    assert composite_result == expected
+
+    
+
+
+
 
 
