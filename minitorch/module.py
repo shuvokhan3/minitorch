@@ -5,29 +5,36 @@ from typing import Dict, List, Tuple, Any, Sequence
 
 class Parameter:
     """A Trainable parameter in a neural network"""
-    def __init__(self,value:any):
+
+    #define constructor that takes any value and stores it as the parameter value. The value can be a scalar, list, tensor, etc.
+    def __init__(self, value:any):
         self.value = value
     
     @property
     def shape(self):
         """Return parameter shape if available"""
+        #if the value has a shape attribute, return it. Otherwise, return empty tuple for scalars and None
         if hasattr(self.value, "shape"):
             return self.value.shape
         return ()
     
+    #if helps clearly show the parameter value when printed
     def __repr__(self):
         return f"Parameter({self.value})"
     
+    #allow updating the parameter value after creation
     def update(self, value:Any) -> None:
         """Update the parameter value"""
         self.value = value  
+
+
 
 class Module:
     """Base class for all neural network modules"""
 
     def __init__(self):
-        self.__modules__ = {}
-        self.__parameters__ = {}
+        self._modules = {}
+        self._parameters = {}
         self.training = True
         
     def modules(self) -> Sequence["Module"]:
