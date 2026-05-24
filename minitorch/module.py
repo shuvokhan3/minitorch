@@ -85,10 +85,11 @@ class Module:
         self.__parameters__[name] = param
         return param
         
-    def __setattr__(self, key: str, val: Parameter) -> None:
-        if isinstance(val, Parameter):
-            self.__dict__["_parameters"][key] = val
-        elif isinstance(val, Module):
-            self.__dict__["_modules"][key] = val
-        else:
-            super().__setattr__(key, val)
+    def __getattr__(self, key):
+        if key in self.__dict__["_parameters"]:
+            return self.__dict__["_parameters"][key]
+
+        if key in self.__dict__["_modules"]:
+            return self.__dict__["_modules"][key]
+
+        raise AttributeError(f"{type(self).__name__} has no attribute {key}")
