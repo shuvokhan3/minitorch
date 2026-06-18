@@ -123,7 +123,7 @@ def reduce(fn: Callable[[float, float], float], start: float) -> Callable[[Itera
     def reduced(ls: Iterable[float]) -> float:
         result = start
         for x in ls:
-            return fn(result, x)
+            result = fn(result, x)
         return result
     return reduced
 
