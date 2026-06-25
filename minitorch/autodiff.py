@@ -19,19 +19,20 @@ def central_difference(f: Callable[..., float], *vals: float, arg: int = 0, epsi
         >>> central_difference(mul, 3, 4, arg=0) # df/dx at (3,4) 4.0
         >>> central_difference(mul, 3,4, arg= 0) # df/dy at (3,4) 3.0
     """
-
     vals_list = list(vals)
 
-    #create vals with arg incremented by epsilon
+    #Create vals with arg incremented by epsilon
     vals_plus = vals_list.copy()
     vals_plus[arg] = vals_plus[arg] + epsilon
 
     #create vals with arg decremented by epsilon
     vals_minus = vals_list.copy()
-    vals_minus[arg] = vals_minus[arg] - epsilon
+    vals_minus[arg] = vals_minus[arg] - epsilon 
 
-    #compute central difference
+    #Compute central defference
     f_plus = f(*vals_plus)
     f_minus = f(*vals_minus)
 
     return (f_plus - f_minus) / (2 * epsilon)
+
+
