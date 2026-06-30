@@ -155,3 +155,5 @@ class Context:
         return self._saved_values
 
 
+# Import at end of file to avoid circular import
+from .scalar_functions import Add, Mul, Neg, Inv, Log, Exp, Sigmoid, ReLU
