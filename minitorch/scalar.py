@@ -94,6 +94,18 @@ class Scalar(Variable):
         """Reset accumulated derivative."""
         self.derivative = None
 
+
+    def backward(self, deriv: float = 1.0) -> None:
+        """"
+        Compute gradients for all variables in the computation graph
+
+        Args:
+            deriv: Gradient of the scalar(default 1.0)
+        
+        """
+        from .autodiff import backpropagate
+        backpropagate(self, deriv)
+
     # ------------------------------------------------------------
     # Arithmetic operators
     # ------------------------------------------------------------
@@ -136,6 +148,8 @@ class Scalar(Variable):
 
     def relu(self) -> "Scalar":
         return ReLU.apply(self)
+    
+
 
 
 class Context:
