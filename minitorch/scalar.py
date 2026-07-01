@@ -154,6 +154,6 @@ class Context:
     def saved_values(self) -> Tuple[Any, ...]:
         return self._saved_values
 
-
+# add this import for connecting with the scalar_function.py 
 # Import at end of file to avoid circular import
 from .scalar_functions import Add, Mul, Neg, Inv, Log, Exp, Sigmoid, ReLU
