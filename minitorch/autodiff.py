@@ -84,9 +84,6 @@ class History:
     ctx: Optional["Context"] = None
     inputs: Sequence["Variable"] = ()
 
-
-
-def backpropagate(final_var: Variable, deriv: float = 1.0) -> None:
     """Run reverse-mode autodiff starting from final_var"""
 
     stack = [(final_var, deriv)]
@@ -140,3 +137,47 @@ def topological_sort(var: Variable) -> List[Variable]:
 
     visit(var)
     return order
+
+
+def backpropagate(variable: Variable, deriv: float = 1.0) -> None:
+    """Run backpropagation starting from variable.
+
+       computes gadients for all leat variable in the computation graph .
+       Args:
+           variable:Output variable to differentiate
+           deriv: Gradient of variable(default 1.0 for scalar output)
+    """
+
+    #Get variables in topological order
+    topo_order  = topological_sort(variable)
+
+    #process in REVERSE topological order (output first)
+    reverse_order  = list(reversed(topo_order))
+
+    #Initailize gradient of output
+    variable.derivative = deriv
+
+    for var in reverse_order:
+        if var.is_leaf():
+            # Leaf variables just accumulate gradients, nothing to propagate
+            continue
+
+        if var.derivative is None:
+            # No gradient reached this node (disconnected)
+            continue
+
+        # Get the function that created this variable
+        history = var.history
+        if history is None or history.last_fn is None:
+            continue
+
+        # Call backward to get gradients for inputs
+        backward_fn = history.last_fn.backward 
+        ctx = history.ctx
+        input_grads = backward_fn(ctx, var.derivative)
+
+        # Accumulate gradients to input variables
+        for input_var, grad in zip(history.inputs, input_grads):
+            if grad is not None:
+                input_var.accumulate_derivative(grad)
+            
