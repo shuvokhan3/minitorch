@@ -1,6 +1,6 @@
 """automatic differentiation utilities for minitorch"""
 
-from typing import Callable, List , Tuple, Any
+from typing import Callable, List , Tuple, Any, Set
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
@@ -108,3 +108,35 @@ def backpropagate(final_var: Variable, deriv: float = 1.0) -> None:
         for inp, g in zip(h.inputs, grads):
             stack.append((inp, g))
 
+
+def topological_sort(var: Variable) -> List[Variable]:
+    """
+    Return variables in topological order.
+    Children always appear before parents.
+    """
+
+    #create empty order list and visited set
+    order: List[Variable] = []
+
+    #This prevents visiting the same variable twice.
+    visited: Set[int] = set()
+
+
+    #Nested DFS function
+    def visit(var: Variable) -> None:
+
+        var_id = id(var)
+
+        if var_id in visited:
+            return
+
+        visited.add(var_id)
+
+        if var.history is not None and var.history.inputs:
+            for input_var in var.history.inputs:
+                visit(input_var)
+
+        order.append(var)
+
+    visit(var)
+    return order
