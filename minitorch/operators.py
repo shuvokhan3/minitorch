@@ -77,7 +77,7 @@ def inv(x: float) -> float:
 def log_back(x:float, grad:float) ->float:
     """
     Gradient of log(x) times incoming gradient.
-    Dericative of log(x) is 1/x.
+    Derivative of log(x) is 1/x.
     """    
     return grad / x
 
