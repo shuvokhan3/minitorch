@@ -3,10 +3,12 @@ import math
 from hypothesis import given
 from hypothesis.strategies import floats
 from hypothesis.strategies import lists
+from builtins import sum as sum_py
 
 
-from minitorch.operators import(add, mul, id, neg, lt, eq, max, is_close, sigmoid, relu, log,exp, inv, inv_back , map)   
+from minitorch.operators import(add, mul, id, neg, lt, eq, max, is_close, sigmoid, relu, log,exp, inv, inv_back , map, sum, log_back, relu_back )   
 from minitorch.testing import assert_close
+
 
 small_floats = floats(min_value=-100, max_value=100) 
 
@@ -148,9 +150,19 @@ def test_map_length_preserved(xs):
     expected = [increment(double(x)) for x in xs]
     assert composite_result == expected
 
+
+
+@pytest.mark.task0_3
+@given(small_float_lists)
+def test_sum(val):
+    assert_close(sum(val), sum_py(val))  # compare against Python's builtin sum, imported separately
     
 
+def test_log_back():
+    # d/dx log(x) = 1/x, so log_back(x, grad) = grad/x
+    assert_close(log_back(2.0, 1.0), 0.5)
+    assert_close(log_back(1.0, 3.0), 3.0)
 
-
-
-
+def test_relu_back():
+    assert relu_back(3.0, 5.0) == 5.0   # x > 0, passes gradient through
+    assert relu_back(-1.0, 5.0) == 0.0  # x <= 0, blocks gradient
