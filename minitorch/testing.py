@@ -1,48 +1,34 @@
-from minitorch.scalar import Scalar
+from .scalar import Scalar
+from .autodiff import central_difference
+import math
 
-# def square(x):
-#     return x * x
+def test_function(x_val, y_val):
+    x = Scalar(x_val)
+    x.requires_grad_(True)
+    y = Scalar(y_val)
+    y.requires_grad_(True)
 
-# def mul(x, y):
-#     return x * y
+    # Compute : z = (x * y) + x.log()
+    z = x * y + x.log()
+    z.backward()
 
-# val = central_difference(square, 3.0)
-# print(val)
+    #compare with numerical derivatives
+    def f_for_x(x_val):
+        return x_val * y_val + math.log(x_val)
+    def f_for_y(y_val):
+        return x_val * y_val + math.log(x_val)
+    
+    numerical_dx = central_difference(f_for_x, x_val)
+    numerical_dy = central_difference(f_for_y, y_val)
 
-# val2 = central_difference(mul , 3.0, 4.0 ,arg=0)
-
-# print(val2)
-# print(central_difference(mul, 3.0, 4.0, arg=1))  # ∂(xy)/∂y at (3,4)
-
-
-
-# a = Scalar(2.0, name="a")
-# b = Scalar(3.0, name="b")
-
-
-# print(f"a.data = {a.data}")
-# print(f"a.is_leaf() = {a.is_leaf()}")
-# print(f"a.derivative = {a.derivative}")
-
-# a.accumulate_derivative(1.0)
-# a.accumulate_derivative(2.0)
-# print(f"After accumulating: a.derivative = {a.derivative}")
-
-# print(a.requires_grad_())
-# print(a.is_leaf())
-
-# a.zero_grad_()
-# print(a.derivative)
+    print(f"Autodiff: dx={x.derivative:.6f}, dy={y.derivative:.6f}")
+    print(f"Numerical: dx={numerical_dx:.6f}, dy={numerical_dy:.6f}")
 
 
 
-a = Scalar(2.0)
-a.requires_grad_(True)
-b = Scalar(3.0)
-b.requires_grad_(True)
 
-c = a * b  # c = 6.0
 
-print(f"c.data = {c.data}")
-print(f"c.is_leaf() = {c.is_leaf()}")
-print(f"c.history.last_fn = {c.history.last_fn}")
+test_function(3.0, 4.0)
+
+def assert_close(a: float, b: float) -> None:
+    assert abs(a - b) < 1e-6
