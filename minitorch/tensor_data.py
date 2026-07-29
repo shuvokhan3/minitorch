@@ -162,7 +162,8 @@ class TensorData:
     def tuple(self) -> Tuple[Storage, Shape, Strides]:
         return (self._storage, self._shape, self._strides)
 
-    def permute(self, *order:int) -> TensorData:
+
+    def permute(self, *order: int) -> TensorData:
         """
         Permute the dimensions of the tensor.
 
@@ -170,15 +171,18 @@ class TensorData:
             *order: a permutation of the dimensions
 
         Returns:
-            New TensorData with the same storage and a new dimension order.
+            New TensorData with the same storage and a new dimension order
         """
-        assert list(sorted(order)) == list(range(len(self.shape))), \
-            f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
+        assert list(sorted(order)) == list(range(len(self.shape))), (
+            f"Must give a position to each dimension . shape: {self.shape} order :{order}"
+        )
 
-        new_shape = tuple(self.shape[0] for 0 in order)
-        new_strides = tuple(self.strides[0] for 0 in order)
+        new_shape = tuple(self.shape[i] for i in order)
+        new_strides = tuple(self.strides[i] for i in order)
 
         return TensorData(self._storage, new_shape, new_strides)
+    
+
     
     def to_string(self) -> str:
         s = ""
