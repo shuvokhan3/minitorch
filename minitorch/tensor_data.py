@@ -6,6 +6,7 @@ import numpy.typing as npt
 from numpy import array, float64
 from typing_extensions import TypeAlias
 from .operators import prod
+import numba
 
 
 MAX_DIMS = 32
@@ -140,11 +141,11 @@ class TensorData:
                 raise IndexingError(f"Negative indexing for {aindex} not supported.")
 
         # Call fast indexing.
-        return index_to_position(array(index), self._strides)
+        return index_to_position(aindex, self._strides)
 
     def indices(self) -> Iterable[UserIndex]:
         lshape: Shape = array(self.shape)
-        out_index: Index = array(self.shape)
+        out_index: Index = np.zeros(len(self.shape), dtype=np.int32)
         for i in range(self.size):
             to_index(i, lshape, out_index)
             yield tuple(out_index)
