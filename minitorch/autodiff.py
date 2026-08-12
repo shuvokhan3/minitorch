@@ -161,3 +161,24 @@ def backpropagate(variable: Variable, deriv: float = 1.0) -> None:
             if grad is not None:
                 input_var.accumulate_derivative(grad)
             
+@dataclass
+class Context:
+    """
+    Context class is used by `function` to store inforamtion during the forwad pass.
+    """
+
+    no_grad: bool = False
+    saved_values: Tuple[Any, ...] = ()
+
+    def save_for_backword(self, *values: Any) -> None:
+        "Store the given `values` if they need to be used during backpropagation"
+        if self.no_grad:
+            return 
+        self.saved_values = values
+
+
+    @property
+    def saved_tensors(self) -> Tuple[Any, ...]:
+        return self.saved_values
+
+    
