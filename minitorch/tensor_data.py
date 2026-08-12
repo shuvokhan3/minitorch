@@ -64,6 +64,93 @@ def to_index(ordinal: int, shape:Shape, out_index: OutIndex) -> None:
         cur_ord = cur_ord // shape[i]
 
 
+def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
+    """
+    Broadcast two shapes to crete a new union shape.
+
+    Args : 
+    Shape 1 : first shape
+    shape2  : second shape
+
+    returns: broadcasted shape
+
+    raises:
+    indexingError: if shapes cannot broadcast
+
+    """
+    # Hint: Work from the right side of both shapes
+    # At each position, take the max of the two dimensions
+    # But raise an error if neither is 1 and they differ
+
+    result = []
+    len1, len2 = len(shape1), len(shape2)
+    max_len = max(len1, len2)
+
+    for i in range(max_len):
+        d1 = shape1[len1 - 1 - i] if i < len1 else 1
+        d2 = shape2[len2 - 1 - i] if i < len2 else 1
+
+        if d1 == d2:
+            result.append(d1)
+        elif d1 == 1:
+            result.append(d2)
+        elif d2 == 1:
+            result.append(d1)
+        else:
+            raise IndexingError(f"Cannot broadcast shapes {shape1} and {shape2}")
+
+    return tuple(reversed(result))
+
+
+
+
+
+
+#Add a temporary broadcast_index
+def broadcast_index(
+    big_index: Index,
+    big_shape: Shape,
+    shape: Shape,
+    out_index: OutIndex,
+) -> None:
+    """
+    Convert a big_index into big_shape to a smaller out_index into shape
+    following broadcasting rules.
+
+    If the shape dimension is 1, the index for that dimension should be 0.
+    If the shape has fewer dimensions, ignore leading dimensions of big_index.
+
+    Args:
+        big_index: multidimensional index of bigger tensor
+        big_shape: shape of bigger tensor
+        shape: shape of smaller tensor
+        out_index: output array to fill
+
+    Returns:
+        None (modifies out_index in place)
+    """
+
+    offset = len(big_shape) - len(shape)
+
+    for i in range(len(shape)):
+        if shape[i] == 1:
+            out_index[i] = 0
+        else:
+            out_index[i] = big_index[i + offset]
+
+def strides_from_shape(shape:UserShape) -> UserStrides:
+    layout = [1]
+    offset = 1
+
+    for s in reversed(shape):
+        layout.append(s * offset)
+        offset = s * offset
+
+    return tuple(reversed(layout[:-1]))
+
+
+
+
 
 class TensorData:
     _storage: Storage
@@ -209,9 +296,6 @@ class TensorData:
                 s += " "
         return s
 
-     
 
 
-        
-        
 
