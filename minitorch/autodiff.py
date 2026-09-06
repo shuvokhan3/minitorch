@@ -170,7 +170,7 @@ class Context:
     no_grad: bool = False
     saved_values: Tuple[Any, ...] = ()
 
-    def save_for_backword(self, *values: Any) -> None:
+    def save_for_backward(self, *values: Any) -> None:
         "Store the given `values` if they need to be used during backpropagation"
         if self.no_grad:
             return 
