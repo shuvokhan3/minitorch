@@ -287,6 +287,8 @@ def tensor_reduce(fn):
 
     return _reduce
 
+SimpleBackend = TensorBackend(SimpleOps)
+
 
 
 
