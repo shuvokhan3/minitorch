@@ -8,5 +8,9 @@ from .testing import MathTestVariable, grad_check
 from .tensor_ops import SimpleBackend
 from .module import Module, Parameter
 
+from .tensor_functions import tensor, rand
+from .optim import SGD
+
+
 
 
